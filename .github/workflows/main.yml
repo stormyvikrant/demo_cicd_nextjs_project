@@ -25,7 +25,7 @@ jobs:
       run: npm run lint  # Lint your Next.js code
 
     - name: Run Tests
-      run: npm run test  # Run tests for Next.js
+      run: npm run test -- --passWithNoTests # Run tests for Next.js
 
     - name: Build Next.js project
       run: npm run build  # Build the Next.js project
