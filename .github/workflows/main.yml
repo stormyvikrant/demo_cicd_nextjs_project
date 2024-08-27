@@ -1,0 +1,49 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch if different
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'  # Specify your Node.js version
+
+    - name: Install dependencies
+      run: npm install  # Install Next.js project dependencies
+
+    - name: Run Lint
+      run: npm run lint  # Lint your Next.js code
+
+    - name: Run Tests
+      run: npm run test  # Run tests for Next.js
+
+    - name: Build Next.js project
+      run: npm run build  # Build the Next.js project
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image
+      run: |
+        REPO_NAME="${{ secrets.DOCKER_USERNAME }}/nextjs_projects"  # Specify the Docker repository name for your Next.js project
+        IMAGE_TAG="$(echo $GITHUB_SHA | cut -c1-7)"  # Get the first 7 characters of the commit SHA for the image tag
+        docker build -t $REPO_NAME:$IMAGE_TAG .  # Build the Docker image with the specified name and tag
+
+    - name: Push Docker image
+      run: |
+        REPO_NAME="${{ secrets.DOCKER_USERNAME }}/nextjs_projects"  # Specify the same Docker repository name
+        IMAGE_TAG="$(echo $GITHUB_SHA | cut -c1-7)"  # Get the first 7 characters of the commit SHA for the image tag
+        docker push $REPO_NAME:$IMAGE_TAG  # Push the built image to Docker Hub with the specified name and tag
